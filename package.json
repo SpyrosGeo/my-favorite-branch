@@ -11,10 +11,16 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
+  "icon":"images/icon.png",
+  "repository": {
+    "type":"git",
+    "url":"git@github.com:SpyrosGeo/my-favorite-branch.git"
+  },
   "contributes": {
     "commands": [
       {
-        "command": "my-favorite-branch.helloWorld",
+        "command": "extension.openBranchSelector",
+    "text": "$(git-branch) $(git-symbol) $(git-branch)",
         "title": "FavoriteBranch: toggle"
       }
     ],
