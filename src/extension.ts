@@ -8,11 +8,10 @@ import * as vscode from 'vscode';
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	let openDrawer = vscode.commands.registerCommand('extension.openDrawer', () => {
-
-	});
-	context.subscriptions.push(openDrawer);
-	context.subscriptions.push(createStatusBarItem());
+	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', () => {
+		let currentBranch = getCurrentBranch();
+		context.globalState.update('selected')
+	})
 
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', () => {
 		const branch = vscode.window.showQuickPick(getFavoriteBranches(), { canPickMany: false, placeHolder: 'My favorite branches' });
@@ -22,24 +21,24 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(checkoutFavoriteBranch);
 }
 
-function createStatusBarItem() {
-	const iconPath = {
-		light: path.join(__filename, '..', 'resources', 'light', 'my-icon.png'),
-		dark: path.join(__filename, '..', 'resources', 'dark', 'my-icon.png')
-	};
-	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-	statusBarItem.text = '$(my-icon)';
-	statusBarItem.tooltip = 'Click to open drawer';
-	statusBarItem.command = 'myExtension.openDrawer';
-	statusBarItem.color = '#fff';
-	statusBarItem.show();
-	return statusBarItem;
-}
-function getFavoriteBranches(): { id: string, label: string, description: string, detail: string; }[] => {
+// function createStatusBarItem() {
+// 	const iconPath = {
+// 		light: path.join(__filename, '..', 'resources', 'light', 'my-icon.png'),
+// 		dark: path.join(__filename, '..', 'resources', 'dark', 'my-icon.png')
+// 	};
+// 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+// 	statusBarItem.text = '$(my-icon)';
+// 	statusBarItem.tooltip = 'Click to open drawer';
+// 	statusBarItem.command = 'myExtension.openDrawer';
+// 	statusBarItem.color = '#fff';
+// 	statusBarItem.show();
+// 	return statusBarItem;
+// }
+function getFavoriteBranches(): { id: string, label: string, description?: string, detail?: string; }[] {
 	return [
-		{ id: 'test1', label: 'Item 1', description: 'Description for Item 1', detail: 'Additional details for Item 1' },
-		{ id: 'test2', label: 'Item 2', description: 'Description for Item 2', detail: 'Additional details for Item 2' },
-		{ id: 'test3', label: 'Item 3', description: 'Description for Item 3', detail: 'Additional details for Item 3' },
+		{ id: 'test1', label: 'Item 1' },
+		{ id: 'test2', label: 'Item 2' },
+		{ id: 'test3', label: 'Item 3' },
 	];
 };
 
