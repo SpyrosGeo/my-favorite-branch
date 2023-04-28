@@ -17,12 +17,14 @@ export function activate(context: vscode.ExtensionContext) {
 	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', () => {
 		let favoriteBranches = getFavoriteBranches(context);
 		const currentBranch = getCurrentBranch();
-		const optionObject: BranchOption = { id: currentBranch, label: currentBranch }
+		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
 		//TODO 
 		//append to favorites array and save to storage
+		const newFavoriteBranches = JSON.stringify([...favoriteBranches, newBranch]);
 
-		// context.globalState.update('selected',)
-	})
+		context.globalState.update('favoriteBranches', newFavoriteBranches);
+		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`)
+	});
 
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', () => {
 		const branch = vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });

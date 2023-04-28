@@ -20,8 +20,10 @@
     "commands": [
       {
         "command": "extension.openBranchSelector",
-    "text": "$(git-branch) $(git-symbol) $(git-branch)",
         "title": "FavoriteBranch: toggle"
+      },{
+        "command": "extension.addToFavorites",
+        "title": "FavoriteBranch: add"
       }
     ],
     "statusbar": {
