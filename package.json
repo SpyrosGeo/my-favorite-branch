@@ -25,28 +25,17 @@
       }
     ],
     "statusbar": {
-    "command": "extension.openBranchSelector",
-    "text": "$(git-branch) $(git-symbol) $(git-branch)",
-    "tooltip": "Select Branch"
+      "id":"extension.icon",
+      "label":"favorite-branch",
+      "tooltip":"Toggle Favorite branches drawer",
+      "command":"extension.openDrawer",
+      "color":"#fff",
+      "alignment":"left",
+      "priority":100
+
+}
 },
-"viewsContainers": {
-      "explorer": [
-        {
-          "id": "myExtension.branchSelector",
-          "title": "Branch Selector"
-        }
-      ]
-    },
-    "views": {
-      "myExtension.branchSelector": [
-        {
-          "id": "myExtension.branchList",
-          "name": "Branch List",
-          "when": "resourceScheme == 'file'"
-        }
-      ]
-    }
-  },
+
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
