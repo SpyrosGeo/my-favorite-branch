@@ -3,18 +3,29 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+interface BranchOption {
+	id: string;
+	label: string;
+	description?: string;
+	detail?: string;
+}
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
 	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', () => {
-		let currentBranch = getCurrentBranch();
-		context.globalState.update('selected')
+		let favoriteBranches = getFavoriteBranches(context);
+		const currentBranch = getCurrentBranch();
+		const optionObject: BranchOption = { id: currentBranch, label: currentBranch }
+		//TODO 
+		//append to favorites array and save to storage
+
+		// context.globalState.update('selected',)
 	})
 
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', () => {
-		const branch = vscode.window.showQuickPick(getFavoriteBranches(), { canPickMany: false, placeHolder: 'My favorite branches' });
+		const branch = vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
 	});
 
 
@@ -34,7 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
 // 	statusBarItem.show();
 // 	return statusBarItem;
 // }
-function getFavoriteBranches(): { id: string, label: string, description?: string, detail?: string; }[] {
+function getFavoriteBranches(context: vscode.ExtensionContext): BranchOption[] {
+	//get json string from storage
+	const jsonString: string | undefined = context.globalState.get('favoriteBranches');
+	// return jsonString ? JSON.parse(jsonString) : [];
 	return [
 		{ id: 'test1', label: 'Item 1' },
 		{ id: 'test2', label: 'Item 2' },
