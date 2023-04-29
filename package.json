@@ -28,7 +28,7 @@
       },
       {
         "command": "extension.removeFromFavorites",
-        "title":"FavoriteBranch: remove"
+        "title": "FavoriteBranch: remove"
       }
     ],
     "statusbar": {
@@ -64,5 +64,8 @@
   },
   "extensionDependencies": [
     "vscode.git"
-  ]
+  ],
+  "dependencies": {
+    "simple-git": "^3.18.0"
+  }
 }

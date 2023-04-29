@@ -1,7 +1,8 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as path from 'path';
 import * as vscode from 'vscode';
+import { simpleGit, SimpleGit, CleanOptions, TaskOptions } from 'simple-git';
+const git: SimpleGit = simpleGit().clean(CleanOptions.FORCE);
 interface BranchOption {
 	id: string;
 	label: string;
@@ -20,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 		let favoriteBranches = getFavoriteBranches(context);
 		console.log('favoriteBranches', favoriteBranches[0]);
 		const currentBranch = await getCurrentBranch(context);
-		// const currentBranch = 'test';
 
 		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
 		//TODO 
@@ -30,8 +30,12 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
 	});
 
-	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', () => {
-		const branch = vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
+	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', async () => {
+		const branch = await vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
+		if (!branch?.label) return;
+		await git.checkout(branch.label, (err) => {
+			vscode.window.showInformationMessage(`${err}`);
+		})
 	});
 
 
@@ -88,29 +92,14 @@ function setFavoriteBranches(context: vscode.ExtensionContext, favoriteBranches:
 
 
 async function getCurrentBranch(context: vscode.ExtensionContext): Promise<string> {
-	let currentBranch;
+	let currentBranch = '';
 	try {
-		const extension = vscode.extensions.getExtension('vscode.git');
-
-		if (extension !== undefined) {
-			const gitExtension = extension.isActive ? extension.exports : await extension.activate();
-			const git = gitExtension.getAPI(1);
-			console.log('gitrepos', git.repositories)
-			const repo = git.repositories[0];
-			currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
-
-		}
+		const git = simpleGit();
+		currentBranch = (await git.branchLocal()).current;
 	} catch (error) {
 		console.log('error', error);
 	}  // log error
-	// const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-	// const git = gitExtension.getAPI(1);
-	// const repo = git.repositories[0];
-	// const currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
-	// vscode.window.showInformationMessage(currentBranch);
 	return currentBranch;
-
-
 };
 
 // This method is called when your extension is deactivated
