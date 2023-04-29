@@ -14,16 +14,20 @@ interface BranchOption {
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', () => {
+	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', async () => {
 		let favoriteBranches = getFavoriteBranches(context);
-		const currentBranch = getCurrentBranch();
+		console.log('favoriteBranches', favoriteBranches[0]);
+		const currentBranch = await getCurrentBranch(context);
+		// const currentBranch = 'test';
+
 		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
 		//TODO 
 		//append to favorites array and save to storage
 		const newFavoriteBranches = JSON.stringify([...favoriteBranches, newBranch]);
+		console.log('newFavoriteBranches', newFavoriteBranches);
 
 		context.globalState.update('favoriteBranches', newFavoriteBranches);
-		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`)
+		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
 	});
 
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', () => {
@@ -50,21 +54,35 @@ export function activate(context: vscode.ExtensionContext) {
 function getFavoriteBranches(context: vscode.ExtensionContext): BranchOption[] {
 	//get json string from storage
 	const jsonString: string | undefined = context.globalState.get('favoriteBranches');
-	// return jsonString ? JSON.parse(jsonString) : [];
-	return [
-		{ id: 'test1', label: 'Item 1' },
-		{ id: 'test2', label: 'Item 2' },
-		{ id: 'test3', label: 'Item 3' },
-	];
+	return jsonString ? JSON.parse(jsonString) : [];
+	// return [
+	// 	{ id: 'test1', label: 'Item 1' },
+	// 	{ id: 'test2', label: 'Item 2' },
+	// 	{ id: 'test3', label: 'Item 3' },
+	// ];
 };
 
 
-function getCurrentBranch(): string {
-	const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-	const git = gitExtension.getAPI(1);
-	console.log('git', git.arg1.git);
-	const repo = git.repositories[0];
-	const currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
+async function getCurrentBranch(context: vscode.ExtensionContext): Promise<string> {
+	let currentBranch;
+	try {
+		const extension = vscode.extensions.getExtension('vscode.git');
+
+		if (extension !== undefined) {
+			const gitExtension = extension.isActive ? extension.exports : await extension.activate();
+			const git = gitExtension.getAPI(1);
+			const repo = git.repositories[0];
+			currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
+
+		}
+	} catch (error) {
+		console.log('error', error);
+	}  // log error
+	// const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+	// const git = gitExtension.getAPI(1);
+	// const repo = git.repositories[0];
+	// const currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
+	// vscode.window.showInformationMessage(currentBranch);
 	return currentBranch;
 
 
