@@ -11,33 +11,36 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
-  "icon":"images/icon.png",
+  "icon": "images/icon.png",
   "repository": {
-    "type":"git",
-    "url":"git@github.com:SpyrosGeo/my-favorite-branch.git"
+    "type": "git",
+    "url": "git@github.com:SpyrosGeo/my-favorite-branch.git"
   },
   "contributes": {
     "commands": [
       {
         "command": "extension.openBranchSelector",
-        "title": "FavoriteBranch: toggle"
-      },{
+        "title": "FavoriteBranch: show"
+      },
+      {
         "command": "extension.addToFavorites",
         "title": "FavoriteBranch: add"
+      },
+      {
+        "command": "extension.removeFromFavorites",
+        "title":"FavoriteBranch: remove"
       }
     ],
     "statusbar": {
-      "id":"extension.icon",
-      "label":"favorite-branch",
-      "tooltip":"Toggle Favorite branches drawer",
-      "command":"extension.openDrawer",
-      "color":"#fff",
-      "alignment":"left",
-      "priority":100
-
-}
-},
-
+      "id": "extension.icon",
+      "label": "favorite-branch",
+      "tooltip": "Toggle Favorite branches drawer",
+      "command": "extension.openDrawer",
+      "color": "#fff",
+      "alignment": "left",
+      "priority": 100
+    }
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -47,16 +50,19 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.77.0",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/vscode": "^1.77.0",
     "@typescript-eslint/eslint-plugin": "^5.59.1",
     "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
     "eslint": "^8.39.0",
     "glob": "^8.1.0",
     "mocha": "^10.2.0",
-    "typescript": "^5.0.4",
-    "@vscode/test-electron": "^2.3.0"
-  }
+    "typescript": "^5.0.4"
+  },
+  "extensionDependencies": [
+    "vscode.git"
+  ]
 }

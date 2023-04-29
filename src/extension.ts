@@ -2,7 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as path from 'path';
 import * as vscode from 'vscode';
-
 interface BranchOption {
 	id: string;
 	label: string;
@@ -13,6 +12,9 @@ interface BranchOption {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const removeBranchFromFavorites = vscode.commands.registerCommand('extension.removeFromFavorites', async () => {
+		removeBranch(context);
+	});
 
 	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', async () => {
 		let favoriteBranches = getFavoriteBranches(context);
@@ -23,10 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
 		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
 		//TODO 
 		//append to favorites array and save to storage
-		const newFavoriteBranches = JSON.stringify([...favoriteBranches, newBranch]);
-		console.log('newFavoriteBranches', newFavoriteBranches);
+		setFavoriteBranches(context, favoriteBranches, newBranch);
 
-		context.globalState.update('favoriteBranches', newFavoriteBranches);
 		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
 	});
 
@@ -51,6 +51,20 @@ export function activate(context: vscode.ExtensionContext) {
 // 	statusBarItem.show();
 // 	return statusBarItem;
 // }
+function removeBranch(context: vscode.ExtensionContext, id?: string): void {
+	if (!id) {
+		context.globalState.update('favoriteBranches', '');
+		return;
+	}
+	if (id) {
+		let favoriteBranches = getFavoriteBranches(context);
+		favoriteBranches = favoriteBranches.filter((branch: BranchOption) => branch.id !== id);
+		setFavoriteBranches(context, favoriteBranches);
+	}
+
+}
+
+
 function getFavoriteBranches(context: vscode.ExtensionContext): BranchOption[] {
 	//get json string from storage
 	const jsonString: string | undefined = context.globalState.get('favoriteBranches');
@@ -61,6 +75,16 @@ function getFavoriteBranches(context: vscode.ExtensionContext): BranchOption[] {
 	// 	{ id: 'test3', label: 'Item 3' },
 	// ];
 };
+function setFavoriteBranches(context: vscode.ExtensionContext, favoriteBranches: BranchOption[], newBranch?: BranchOption) {
+	let newFavoriteBranches: string;
+	if (newBranch) {
+		newFavoriteBranches = JSON.stringify([...favoriteBranches, newBranch]);
+	} else {
+		newFavoriteBranches = JSON.stringify(favoriteBranches);
+	}
+
+	context.globalState.update('favoriteBranches', newFavoriteBranches);
+}
 
 
 async function getCurrentBranch(context: vscode.ExtensionContext): Promise<string> {
@@ -71,6 +95,7 @@ async function getCurrentBranch(context: vscode.ExtensionContext): Promise<strin
 		if (extension !== undefined) {
 			const gitExtension = extension.isActive ? extension.exports : await extension.activate();
 			const git = gitExtension.getAPI(1);
+			console.log('gitrepos', git.repositories)
 			const repo = git.repositories[0];
 			currentBranch = repo.state.head ? repo.state.head.name : 'Detached head state';
 
