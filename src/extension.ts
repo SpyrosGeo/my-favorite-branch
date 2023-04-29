@@ -33,8 +33,12 @@ export function activate(context: vscode.ExtensionContext) {
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', async () => {
 		const branch = await vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
 		if (!branch?.label) return;
-		await git.checkout(branch.label, (err) => {
-			vscode.window.showInformationMessage(`${err}`);
+		git.checkout(branch.label, (err) => {
+
+			if (err) {
+				vscode.window.showInformationMessage(`err ${err}`);
+			} else vscode.window.showInformationMessage(`switch to ${branch?.label} branch`);
+		}).then(() => {
 		})
 	});
 
