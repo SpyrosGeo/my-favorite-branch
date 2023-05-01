@@ -14,6 +14,9 @@ interface BranchOption {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+	const git: SimpleGit = simpleGit({ binary: 'git', baseDir: currentWorkingSpace, maxConcurrentProcesses: 6 }).clean(CleanOptions.FORCE);
+	console.log('dir', currentWorkingSpace)
 	const removeBranchFromFavorites = vscode.commands.registerCommand('extension.removeFromFavorites', async () => {
 		removeBranch(context);
 	});
