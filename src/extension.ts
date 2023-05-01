@@ -2,10 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { simpleGit, SimpleGit, CleanOptions, TaskOptions } from 'simple-git';
-import { stderr } from 'process';
-import lel from './gitWindows';
 const { exec,spawn} = require('child_process');
-const git: SimpleGit = simpleGit().clean(CleanOptions.FORCE);
 interface BranchOption {
 	id: string;
 	label: string;
@@ -16,6 +13,9 @@ interface BranchOption {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+const git: SimpleGit = simpleGit({binary:'git',baseDir:currentWorkingSpace,maxConcurrentProcesses:6}).clean(CleanOptions.FORCE);
+	console.log('dir',currentWorkingSpace)
 	const removeBranchFromFavorites = vscode.commands.registerCommand('extension.removeFromFavorites', async () => {
 		removeBranch(context);
 	});
@@ -99,19 +99,19 @@ function setFavoriteBranches(context: vscode.ExtensionContext, favoriteBranches:
 async function getCurrentBranch(context: vscode.ExtensionContext,git:SimpleGit): Promise<string> {
 
 	let currentBranch = '';
-	if(process.platform==="win32"){
-	const workspaceFolders=	vscode.workspace.workspaceFolders;
-	if(workspaceFolders){
-		const currentWorkSpace = workspaceFolders[0];
-		currentBranch = await getCurrentBranchWindows(currentWorkSpace);
-	}
-	}else {
+	// if(process.platform==="win32"){
+	// const workspaceFolders=	vscode.workspace.workspaceFolders;
+	// if(workspaceFolders){
+	// 	const currentWorkSpace = workspaceFolders[0];
+	// 	currentBranch = await getCurrentBranchWindows(currentWorkSpace);
+	// }
+	// }else {
 	try {
 		currentBranch = (await git.branchLocal()).current;
 	} catch (error) {
 		console.log('error', error);
 	}  // log error
-}
+// }
 console.log('currentBranch',currentBranch);
 	return currentBranch;
 };
