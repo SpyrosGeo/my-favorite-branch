@@ -17,6 +17,16 @@
     "url": "git@github.com:SpyrosGeo/my-favorite-branch.git"
   },
   "contributes": {
+    "statusBar":[
+      {
+        "id":"extension.openBranchSelector",
+        "alignment":"right",
+        "priority":100,
+        "command":"extension.openBranchSelector",
+        "tooltip":"Opens Favorites drawer",
+        "text":"$(star-full)"
+      }
+    ],
     "commands": [
       {
         "command": "extension.openBranchSelector",
@@ -30,16 +40,8 @@
         "command": "extension.removeFromFavorites",
         "title": "FavoriteBranch: remove"
       }
-    ],
-    "statusbar": {
-      "id": "extension.icon",
-      "label": "favorite-branch",
-      "tooltip": "Toggle Favorite branches drawer",
-      "command": "extension.openDrawer",
-      "color": "#fff",
-      "alignment": "left",
-      "priority": 100
-    }
+    ]
+
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

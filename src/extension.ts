@@ -3,7 +3,6 @@
 import * as vscode from 'vscode';
 import { simpleGit, SimpleGit, CleanOptions, TaskOptions } from 'simple-git';
 const { exec, spawn } = require('child_process');
-const git: SimpleGit = simpleGit().clean(CleanOptions.FORCE);
 interface BranchOption {
 	id: string;
 	label: string;
@@ -13,6 +12,7 @@ interface BranchOption {
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+let statusBarItem:vscode.StatusBarItem;
 export function activate(context: vscode.ExtensionContext) {
 	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 	const git: SimpleGit = simpleGit({ binary: 'git', baseDir: currentWorkingSpace, maxConcurrentProcesses: 6 }).clean(CleanOptions.FORCE);
@@ -32,8 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
 	});
-
-	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', async () => {
+	const openBranchSelectorId = 'extension.openBranchSelector'
+	let checkoutFavoriteBranch = vscode.commands.registerCommand(openBranchSelectorId, async () => {
 		const branch = await vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
 		if (!branch?.label) { return; };
 		git.checkout(branch.label, (err) => {
@@ -46,6 +46,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	context.subscriptions.push(checkoutFavoriteBranch);
+	// statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right,100);
+	// statusBarItem.command = openBranchSelectorId;
+	// statusBarItem.name='test'
+	// context.subscriptions.push(statusBarItem);
+	// context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
+	// context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
 }
 
 // function createStatusBarItem() {
