@@ -2,9 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { simpleGit, SimpleGit, CleanOptions, TaskOptions } from 'simple-git';
-import { stderr } from 'process';
-import lel from './gitWindows';
-const { exec,spawn} = require('child_process');
+const { exec, spawn } = require('child_process');
 const git: SimpleGit = simpleGit().clean(CleanOptions.FORCE);
 interface BranchOption {
 	id: string;
@@ -22,11 +20,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', async () => {
 		let favoriteBranches = getFavoriteBranches(context);
-		const currentBranch = await getCurrentBranch(context,git);
-		console.log('currentBranch inside',currentBranch);
+		const currentBranch = await getCurrentBranch(context, git);
+		console.log('currentBranch inside', currentBranch);
 
 		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
-	
+
 		setFavoriteBranches(context, favoriteBranches, newBranch);
 
 		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
@@ -34,12 +32,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let checkoutFavoriteBranch = vscode.commands.registerCommand('extension.openBranchSelector', async () => {
 		const branch = await vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
-		if (!branch?.label){return;};
+		if (!branch?.label) { return; };
 		git.checkout(branch.label, (err) => {
-
 			if (err) {
 				vscode.window.showInformationMessage(`err ${err}`);
-			} else{ vscode.window.showInformationMessage(`switch to ${branch?.label} branch`);}
+			} else { vscode.window.showInformationMessage(`switch to ${branch?.label} branch`); }
 		}).then(() => {
 		});
 	});
@@ -96,36 +93,36 @@ function setFavoriteBranches(context: vscode.ExtensionContext, favoriteBranches:
 	context.globalState.update('favoriteBranches', newFavoriteBranches);
 }
 
-async function getCurrentBranch(context: vscode.ExtensionContext,git:SimpleGit): Promise<string> {
+async function getCurrentBranch(context: vscode.ExtensionContext, git: SimpleGit): Promise<string> {
 
 	let currentBranch = '';
-	if(process.platform==="win32"){
-	const workspaceFolders=	vscode.workspace.workspaceFolders;
-	if(workspaceFolders){
-		const currentWorkSpace = workspaceFolders[0];
-		currentBranch = await getCurrentBranchWindows(currentWorkSpace);
-	}
-	}else {
+	// if (process.platform === "win32") {
+	// 	const workspaceFolders = vscode.workspace.workspaceFolders;
+	// 	if (workspaceFolders) {
+	// 		const currentWorkSpace = workspaceFolders[0];
+	// 		currentBranch = await getCurrentBranchWindows(currentWorkSpace);
+	// 	}
+	// } else {
 	try {
 		currentBranch = (await git.branchLocal()).current;
 	} catch (error) {
 		console.log('error', error);
 	}  // log error
-}
-console.log('currentBranch',currentBranch);
+	// }
+	console.log('currentBranch', currentBranch);
 	return currentBranch;
 };
 
-async function getCurrentBranchWindows(dir:any):Promise<string>{
-	return new Promise((resolve,reject)=>{
-		let command ='git branch --show-current';
-		exec(command,{cmd:dir},(error:any,stdout:any,stderr:any)=>{
-			if(error){
+async function getCurrentBranchWindows(dir: any): Promise<string> {
+	return new Promise((resolve, reject) => {
+		let command = 'git branch --show-current';
+		exec(command, { cmd: dir }, (error: any, stdout: any, stderr: any) => {
+			if (error) {
 				reject(error);
-				return 
-			}else{
+				return
+			} else {
 				const branchName = stdout.trim();
-				if(branchName.length){
+				if (branchName.length) {
 					reject(new Error('failed'))
 					return;
 				}
