@@ -13,18 +13,17 @@ interface BranchOption {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 let statusBarItem:vscode.StatusBarItem;
-	_showStatusBarItem('extension.openBranchSelector');
+let favoriteBranches:BranchOption[] ;
+let currentBranch:string;
 export function activate(context: vscode.ExtensionContext) {
 	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 	const git: SimpleGit = simpleGit({ binary: 'git', baseDir: currentWorkingSpace, maxConcurrentProcesses: 6 }).clean(CleanOptions.FORCE);
-	console.log('dir', currentWorkingSpace)
+	fetchGitData(context,git);
 	const removeBranchFromFavorites = vscode.commands.registerCommand('extension.removeFromFavorites', async () => {
 		removeBranch(context);
 	});
-
+	context.subscriptions.push(removeBranchFromFavorites);
 	let addBranchToFavorites = vscode.commands.registerCommand('extension.addToFavorites', async () => {
-		let favoriteBranches = getFavoriteBranches(context);
-		const currentBranch = await getCurrentBranch(context, git);
 		console.log('currentBranch inside', currentBranch);
 
 		const newBranch: BranchOption = { id: currentBranch, label: currentBranch };
@@ -33,6 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		vscode.window.showInformationMessage(`Saved branch: ${currentBranch} to favorites`);
 	});
+	context.subscriptions.push(addBranchToFavorites);
+	
 	const openBranchSelectorId = 'extension.openBranchSelector'
 	let checkoutFavoriteBranch = vscode.commands.registerCommand(openBranchSelectorId, async () => {
 		const branch = await vscode.window.showQuickPick(getFavoriteBranches(context), { canPickMany: false, placeHolder: 'My favorite branches' });
@@ -49,10 +50,17 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(checkoutFavoriteBranch);
 	
 }
-function _showStatusBarItem(openBranchSelectorId:string) {
+async function fetchGitData(context:vscode.ExtensionContext,git:SimpleGit){
+	 favoriteBranches = getFavoriteBranches(context);
+		 currentBranch = await getCurrentBranch(context, git);
+		const isFavorite = favoriteBranches.some(branch =>branch.label.includes(currentBranch)); 
+		
+	_showStatusBarItem('extension.openBranchSelector',isFavorite);
+}
+async function _showStatusBarItem(openBranchSelectorId:string, isFavorite?:boolean) {
 
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
-	statusBarItem.text='$(star-full)';
+	statusBarItem.text= isFavorite ? '$(star-full)':'$(star-empty)';
 	statusBarItem.tooltip = "Opens the git favorites drawer";
 	statusBarItem.command = openBranchSelectorId;
 	statusBarItem.show();
