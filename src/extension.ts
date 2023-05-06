@@ -13,6 +13,7 @@ interface BranchOption {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 let statusBarItem:vscode.StatusBarItem;
+	_showStatusBarItem('extension.openBranchSelector');
 export function activate(context: vscode.ExtensionContext) {
 	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 	const git: SimpleGit = simpleGit({ binary: 'git', baseDir: currentWorkingSpace, maxConcurrentProcesses: 6 }).clean(CleanOptions.FORCE);
@@ -46,27 +47,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	context.subscriptions.push(checkoutFavoriteBranch);
-	// statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right,100);
-	// statusBarItem.command = openBranchSelectorId;
-	// statusBarItem.name='test'
-	// context.subscriptions.push(statusBarItem);
-	// context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem));
-	// context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem));
+	
 }
+function _showStatusBarItem(openBranchSelectorId:string) {
 
-// function createStatusBarItem() {
-// 	const iconPath = {
-// 		light: path.join(__filename, '..', 'resources', 'light', 'my-icon.png'),
-// 		dark: path.join(__filename, '..', 'resources', 'dark', 'my-icon.png')
-// 	};
-// 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-// 	statusBarItem.text = '$(my-icon)';
-// 	statusBarItem.tooltip = 'Click to open drawer';
-// 	statusBarItem.command = 'myExtension.openDrawer';
-// 	statusBarItem.color = '#fff';
-// 	statusBarItem.show();
-// 	return statusBarItem;
-// }
+	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
+	statusBarItem.text='$(star-full)';
+	statusBarItem.tooltip = "Opens the git favorites drawer";
+	statusBarItem.command = openBranchSelectorId;
+	statusBarItem.show();
+}
 function removeBranch(context: vscode.ExtensionContext, id?: string): void {
 	if (!id) {
 		context.globalState.update('favoriteBranches', '');
