@@ -15,10 +15,11 @@ interface BranchOption {
 let statusBarItem:vscode.StatusBarItem;
 let favoriteBranches:BranchOption[] ;
 let currentBranch:string;
+let isFavorite:boolean;
 export function activate(context: vscode.ExtensionContext) {
 	const currentWorkingSpace = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 	const git: SimpleGit = simpleGit({ binary: 'git', baseDir: currentWorkingSpace, maxConcurrentProcesses: 6 }).clean(CleanOptions.FORCE);
-	fetchGitData(context,git);
+	setGitData(context,git);
 	const removeBranchFromFavorites = vscode.commands.registerCommand('extension.removeFromFavorites', async () => {
 		removeBranch(context);
 	});
@@ -48,19 +49,37 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	context.subscriptions.push(checkoutFavoriteBranch);
+
+	vscode.extensions.onDidChange(()=>{
+	updateStatusBarIcon()
+	});
+
 	
 }
+function updateStatusBarIcon(){
+ const icon = getStatusBarIcon();
+ vscode.window.setStatusBarMessage(icon);	
+}
+
+function getStatusBarIcon():string{
+	return isFavorite ? '$(star-full)':'$(star-empty)';
+}
 async function fetchGitData(context:vscode.ExtensionContext,git:SimpleGit){
-	 favoriteBranches = getFavoriteBranches(context);
+		 favoriteBranches = getFavoriteBranches(context);
 		 currentBranch = await getCurrentBranch(context, git);
-		const isFavorite = favoriteBranches.some(branch =>branch.label.includes(currentBranch)); 
+		 isFavorite = favoriteBranches.some(branch =>branch.label.includes(currentBranch)); 
+
+}
+async function setGitData(ctx:vscode.ExtensionContext,git:SimpleGit){
+	 await fetchGitData(ctx,git);
+	
 		
 	_showStatusBarItem('extension.openBranchSelector',isFavorite);
 }
 async function _showStatusBarItem(openBranchSelectorId:string, isFavorite?:boolean) {
 
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
-	statusBarItem.text= isFavorite ? '$(star-full)':'$(star-empty)';
+	statusBarItem.text= getStatusBarIcon();
 	statusBarItem.tooltip = "Opens the git favorites drawer";
 	statusBarItem.command = openBranchSelectorId;
 	statusBarItem.show();
